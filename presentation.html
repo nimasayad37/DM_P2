@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>راهنمای کامل پروژه‌ی دوم داده‌کاوی — پیش‌بینی اعطای وام</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#ffffff; --ink:#1e293b; --muted:#64748b;
+    --brand:#0099cc; --brand2:#0ea5e9; --accent:#f59e0b; --line:#e2e8f0;
+    --good:#16a34a; --soft:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:'B Nazanin','Vazirmatn','Segoe UI',Tahoma,sans-serif;
+    background:linear-gradient(180deg,#f8fafc,#eef2f7); color:var(--ink);
+    line-height:2; font-size:17px;
+  }
+  header.hero{
+    background:linear-gradient(135deg,#0f172a,#0e7490); color:#fff;
+    padding:48px 24px 64px; text-align:center; position:relative; overflow:hidden;
+  }
+  header.hero h1{margin:0 0 8px; font-size:34px}
+  header.hero p{margin:6px 0; opacity:.9}
+  .badge{display:inline-block; background:rgba(255,255,255,.15); padding:4px 14px;
+    border-radius:999px; font-size:14px; margin-top:10px}
+  .layout{display:flex; gap:24px; max-width:1180px; margin:-32px auto 60px; padding:0 18px; align-items:flex-start}
+  nav.toc{
+    position:sticky; top:18px; flex:0 0 250px; background:var(--card);
+    border:1px solid var(--line); border-radius:16px; padding:16px 14px;
+    box-shadow:0 10px 30px rgba(2,6,23,.08); max-height:92vh; overflow:auto;
+  }
+  nav.toc h3{margin:4px 0 10px; color:var(--brand); font-size:18px}
+  nav.toc a{display:block; color:var(--ink); text-decoration:none; padding:6px 10px;
+    border-radius:9px; font-size:15px; transition:.15s}
+  nav.toc a:hover{background:var(--soft); color:var(--brand)}
+  main{flex:1; min-width:0}
+  section.card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:22px 26px; margin-bottom:22px; box-shadow:0 6px 20px rgba(2,6,23,.05);
+  }
+  section.card > h2{
+    color:var(--brand); margin:0 0 4px; font-size:25px;
+    border-bottom:3px solid var(--soft); padding-bottom:8px;
+  }
+  h3.sub{color:#0e7490; margin:18px 0 6px; font-size:20px}
+  details{
+    border:1px solid var(--line); border-radius:12px; padding:6px 16px;
+    margin:12px 0; background:#fbfdff;
+  }
+  details[open]{background:#f6fbfe; box-shadow:inset 0 0 0 1px #dbeafe}
+  summary{cursor:pointer; font-weight:bold; color:#0c4a6e; font-size:18px; padding:8px 4px; list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"◀ "; color:var(--brand); font-size:13px}
+  details[open] summary::before{content:"▼ "}
+  .why{background:#ecfdf5; border-right:4px solid var(--good); padding:10px 14px; border-radius:8px; margin:10px 0}
+  .think{background:#fff7ed; border-right:4px solid var(--accent); padding:10px 14px; border-radius:8px; margin:10px 0}
+  .why b,.think b{color:#0f172a}
+  code{background:#eef2ff; color:#3730a3; padding:2px 6px; border-radius:6px;
+    font-family:Consolas,monospace; direction:ltr; display:inline-block; font-size:14px}
+  .formula{background:#0f172a; color:#e2e8f0; padding:10px 16px; border-radius:10px;
+    direction:ltr; text-align:center; font-family:'Cambria Math',Georgia,serif; margin:10px 0; font-size:18px}
+  ul{margin:8px 0; padding-right:22px}
+  li{margin:4px 0}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:15px}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:right}
+  th{background:var(--soft); color:#0c4a6e}
+  .pill{display:inline-block; background:#e0f2fe; color:#0369a1; border-radius:999px;
+    padding:2px 12px; font-size:13px; margin:2px}
+  .step-num{display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center;
+    background:var(--brand); color:#fff; border-radius:50%; font-size:15px; margin-left:8px}
+  footer{text-align:center; color:var(--muted); padding:30px; font-size:14px}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media(max-width:860px){ .layout{flex-direction:column} nav.toc{position:static; width:100%; flex:none} .grid2{grid-template-columns:1fr} }
+  .progress{position:fixed; top:0; right:0; height:4px; background:var(--accent); width:0; z-index:99}
+</style>
+</head>
+<body>
+<div class="progress" id="bar"></div>
+
+<header class="hero">
+  <h1>🎓 راهنمای کامل پروژه‌ی دوم داده‌کاوی</h1>
+  <p>پیاده‌سازی مدل‌های یادگیری ماشین برای پیش‌بینی اعطای وام بانکی</p>
+  <p>دانشگاه صنعتی امیرکبیر — دانشکده ریاضی و علوم کامپیوتر</p>
+  <span class="badge">از داده‌ی خام تا انتخاب بهترین مدل — گام‌به‌گام</span>
+</header>
+
+<div class="layout">
+  <nav class="toc">
+    <h3>فهرست مطالب</h3>
+    <a href="#intro">۰. ایده و هدف پروژه</a>
+    <a href="#pre">۱. پیش‌نیازها و ابزارها</a>
+    <a href="#eda">۲. تحلیل اکتشافی (EDA)</a>
+    <a href="#missing">۳. مقادیر گم‌شده</a>
+    <a href="#encode">۴. عددی‌سازی دسته‌ای</a>
+    <a href="#outlier">۵. حذف داده‌ی پرت (IQR)</a>
+    <a href="#fselect">۶. انتخاب ویژگی</a>
+    <a href="#split">۷. تقسیم Train/Test و نشت داده</a>
+    <a href="#imbalance">۸. متعادل‌سازی کلاس‌ها</a>
+    <a href="#scale">۹. استاندارد/نرمال‌سازی</a>
+    <a href="#cv">۱۰. اعتبارسنجی و Grid Search</a>
+    <a href="#metrics">۱۱. معیارهای ارزیابی</a>
+    <a href="#models">۱۲. شش مدل یادگیری</a>
+    <a href="#viz">۱۳. نمایش نتایج (t-SNE، ROC، Confusion)</a>
+    <a href="#fi">۱۴. اهمیت ویژگی‌ها</a>
+    <a href="#summary">۱۵. جمع‌بندی و طرز فکر ما</a>
+  </nav>
+
+  <main>
+
+  <!-- 0 -->
+  <section class="card" id="intro">
+    <h2>۰. ایده و هدف پروژه</h2>
+    <p>مسئله یک <b>طبقه‌بندی دودویی (Binary Classification)</b> در حوزه‌ی بانکی است: با داشتنِ اطلاعاتِ مالی و شخصیِ یک متقاضی، پیش‌بینی کنیم وامش <b>تأیید (Approved)</b> می‌شود یا <b>رد (Rejected)</b>. ستونِ هدف <code>loan_status</code> است.</p>
+    <p>هدفِ آموزشیِ پروژه فقط «گرفتنِ دقتِ بالا» نیست؛ بلکه درکِ <b>منطقِ پشتِ هر تصمیم</b> در یک خط‌لوله‌ی (Pipeline) کاملِ داده‌کاوی است: از بارگذاری داده تا انتخابِ نهاییِ مدل. داده شامل ۱۳ ستون و حدود ۴۲۷۹ سطر است؛ ویژگی‌هایی مثل <code>cibil_score</code> (امتیاز اعتباری)، <code>income_annum</code>، <code>loan_amount</code>، دارایی‌ها و وضعیت تحصیلی/اشتغال.</p>
+    <div class="why"><b>طرز فکر کلی:</b> هر مرحله‌ی پیش‌پردازش باید با یک «چرا» همراه باشد و نباید باعثِ نشتِ اطلاعاتِ تست به آموزش شود. در پایان، مدل‌ها را با معیارِ منصفانه (F1) و چند نمودار مقایسه می‌کنیم.</div>
+  </section>
+
+  <!-- 1 -->
+  <section class="card" id="pre">
+    <h2>۱. پیش‌نیازها و ابزارها</h2>
+    <p>برای فهمِ این پروژه لازم است با این مفاهیم و کتابخانه‌ها آشنا باشید:</p>
+    <details open>
+      <summary>کتابخانه‌های استفاده‌شده</summary>
+      <table>
+        <tr><th>ابزار</th><th>کاربرد در این پروژه</th></tr>
+        <tr><td><code>pandas</code></td><td>خواندنِ CSV و کار با داده‌ی جدولی (DataFrame): فیلتر، گروه‌بندی، مقادیر گم‌شده.</td></tr>
+        <tr><td><code>numpy</code></td><td>محاسباتِ عددی و آرایه‌ها (مثلاً تولید تصادفی، مرتب‌سازی اهمیت ویژگی‌ها).</td></tr>
+        <tr><td><code>matplotlib</code> / <code>seaborn</code></td><td>رسمِ نمودار: هیستوگرام، Box Plot، هیت‌مپ، ROC و ماتریس درهم‌ریختگی.</td></tr>
+        <tr><td><code>scikit-learn</code></td><td>قلبِ پروژه: تقسیم داده، اسکیل، انتخاب ویژگی، ۵ مدل، Grid Search، معیارها، t-SNE.</td></tr>
+        <tr><td><code>imbalanced-learn</code></td><td>متعادل‌سازیِ کلاس‌ها: <code>SMOTE</code>, <code>RandomOverSampler</code>, <code>RandomUnderSampler</code>.</td></tr>
+        <tr><td><code>xgboost</code></td><td>مدلِ گرادیان‌بوستینگ که بهترین عملکرد را داشت.</td></tr>
+      </table>
+    </details>
+    <details>
+      <summary>دانشِ پایه‌ی موردنیاز</summary>
+      <ul>
+        <li><b>آمار مقدماتی:</b> میانگین، میانه، مد، چارک، انحراف معیار، توزیع و چولگی.</li>
+        <li><b>جبر خطی سبک:</b> بردار ویژگی، فاصله‌ی اقلیدسی، ضرب داخلی (برای KNN و SVM).</li>
+        <li><b>احتمال:</b> احتمال شرطی و مفهوم آنتروپی (برای Mutual Information و درخت تصمیم).</li>
+        <li><b>مفاهیم ML:</b> آموزش/تست، بیش‌برازش، Regularization، هایپرپارامتر.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- 2 -->
+  <section class="card" id="eda">
+    <h2>۲. تحلیل اکتشافی داده (EDA)</h2>
+    <p>پیش از مدل‌سازی باید داده را «بشناسیم». EDA دو شاخه دارد:</p>
+    <details open>
+      <summary>EDA آماری</summary>
+      <p>با توابعِ <code>df.head()</code>، <code>df.shape</code>، <code>df.info()</code>، <code>df.describe()</code> و <code>value_counts()</code> ساختار، نوعِ ستون‌ها، آمارِ توصیفی و توزیعِ کلاسِ هدف بررسی می‌شود.</p>
+      <div class="why"><b>چرا؟</b> تا بفهمیم کدام ستون عددی/متنی است، چند مقدار گم‌شده داریم، و آیا کلاسِ هدف متوازن است یا نه.</div>
+    </details>
+    <details>
+      <summary>EDA بصری</summary>
+      <ul>
+        <li><b>هیستوگرام:</b> شکلِ توزیع و <b>چولگی (Skewness)</b> ویژگی‌های عددی را نشان می‌دهد. چولگیِ راست یعنی دمِ توزیع به سمت مقادیرِ بزرگ کشیده شده.</li>
+        <li><b>نمودار تعادل کلاس‌ها:</b> با <code>countplot</code> نسبتِ Approved به Rejected را می‌بینیم.</li>
+        <li><b>هیت‌مپ همبستگی:</b> ضریبِ همبستگیِ پیرسون بین همه‌ی ویژگی‌های عددی به‌صورت رنگی.</li>
+        <li><b>Box Plot:</b> میانه، چارک‌ها و <b>داده‌های پرت</b> را به‌صورت فشرده نشان می‌دهد.</li>
+      </ul>
+      <div class="think"><b>طرز فکر:</b> این نمودارها به ما گفتند کدام ویژگی‌ها چوله‌اند (پس میانه برای پرکردنِ گم‌شده بهتر است) و کدام داده‌ی پرت دارند (پس باید درباره‌ی حذفِ آن‌ها تصمیم بگیریم).</div>
+    </details>
+  </section>
+
+  <!-- 3 -->
+  <section class="card" id="missing">
+    <h2>۳. پردازش مقادیر گم‌شده</h2>
+    <p>با <code>df.isna().sum()</code> تعدادِ گم‌شده‌ها را شمردیم و برای هر ستون روشِ مناسب را انتخاب کردیم:</p>
+    <ul>
+      <li><b><code>self_employed</code></b> (دسته‌ای): چون تقریباً ۵۰/۵۰ بود و ارتباطِ روشنی با هدف نداشت، مقادیرِ گم‌شده را <b>بر اساس نسبتِ موجود به‌صورت تصادفی</b> پر کردیم (نه میانگین/مد).</li>
+      <li><b><code>loan_amount</code></b> و <b><code>residential_assets_value</code></b> (عددیِ چوله): با <b>میانه (Median)</b> پر شدند، چون میانه به چولگی حساس نیست و توزیع را کمتر به‌هم می‌ریزد.</li>
+    </ul>
+    <div class="why"><b>چرا میانه نه میانگین؟</b> در توزیعِ چوله، چند مقدارِ خیلی بزرگ میانگین را به سمت خود می‌کشند، اما میانه پایدار می‌ماند.</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="card" id="encode">
+    <h2>۴. عددی‌سازی ویژگی‌های دسته‌ای</h2>
+    <p>مدل‌ها فقط با عدد کار می‌کنند. دو روشِ رایج:</p>
+    <div class="grid2">
+      <details open><summary>One-Hot Encoding</summary>
+        <p>برای هر مقدارِ یک ویژگی، یک ستونِ باینریِ ۰/۱ می‌سازد. مناسبِ ویژگی‌های <b>Nominal</b> (بدون ترتیب).</p>
+      </details>
+      <details open><summary>Ordinal Encoding</summary>
+        <p>هر مقدار را با عددی جایگزین می‌کند (مثل Low=1, Medium=2). مناسبِ ویژگی‌های <b>Ordinal</b> (دارای ترتیب).</p>
+      </details>
+    </div>
+    <div class="think"><b>تصمیم ما:</b> <code>education</code> و <code>self_employed</code> هرکدام فقط دو مقدارِ بدون‌ترتیب داشتند، پس One-Hot زدیم و چون دو دسته‌ای بودند ستونِ اضافی را حذف کردیم تا هم‌خطی (Dummy Trap) پیش نیاید.</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="card" id="outlier">
+    <h2>۵. حذف داده‌های پرت (روش IQR)</h2>
+    <p>روشِ IQR همان روشی است که Box Plot استفاده می‌کند:</p>
+    <div class="formula">IQR = Q3 − Q1 &nbsp;|&nbsp; پرت اگر خارج از [ Q1 − 1.5·IQR , Q3 + 1.5·IQR ]</div>
+    <div class="think"><b>طرز فکر:</b> برای <code>residential_assets_value</code> و <code>commercial_assets_value</code> چون توزیع چوله است، مقادیرِ بزرگ لزوماً پرت نیستند (مشتریانِ ثروتمند واقعی‌اند) و آن‌ها را حذف نکردیم. فقط روی ستونی که پرتِ واقعی داشت (<code>bank_asset_value</code>) IQR زدیم — آن هم <b>به‌صورت تکرارشونده</b> تا دیگر هیچ پرتی نماند.</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="card" id="fselect">
+    <h2>۶. انتخاب ویژگی (Feature Selection)</h2>
+    <p>دو معیارِ آماری را ترکیب کردیم تا ویژگی‌های کم‌اهمیت حذف شوند:</p>
+    <details open>
+      <summary>ضریب همبستگی پیرسون — رابطه‌ی خطی</summary>
+      <div class="formula">r = Cov(X, Y) / ( s_X · s_Y ) ∈ [−1, +1]</div>
+      <p><b>سه پیش‌فرض:</b> رابطه‌ی خطی، نبودِ داده‌ی پرتِ زیاد، و توزیعِ تقریباً نرمال. آستانه‌ی انتخاب را «میانه‌ی اندازه‌ی همبستگی‌ها» گذاشتیم.</p>
+    </details>
+    <details>
+      <summary>اطلاعات متقابل (Mutual Information) — رابطه‌ی خطی و غیرخطی</summary>
+      <div class="formula">I(X;Y) = Σ p(x,y) · log( p(x,y) / (p(x)·p(y)) ) = H(X) − H(X|Y)</div>
+      <p>برخلافِ پیرسون، MI <b>رابطه‌ی غیرخطی</b> را هم می‌بیند و همیشه ≥ ۰ است. نکته‌ی مهم: باید ویژگی‌های گسسته را با پارامترِ <code>discrete_features</code> به <code>mutual_info_classif</code> معرفی کنیم وگرنه مقدارش اشتباه حساب می‌شود.</p>
+    </details>
+    <div class="why"><b>قاعده‌ی نهایی:</b> هر ویژگی‌ای که <b>حداقل یکی</b> از دو شرط (پیرسون یا MI) را برآورده کند نگه داشته می‌شود؛ این‌طوری هم روابطِ خطی و هم غیرخطی پوشش داده می‌شوند.</div>
+  </section>
+
+  <!-- 7 -->
+  <section class="card" id="split">
+    <h2>۷. تقسیم Train/Test و نشت داده</h2>
+    <p>داده را با <code>train_test_split</code> به ۸۰٪ آموزش و ۲۰٪ تست تقسیم کردیم (<code>random_state=42</code>).</p>
+    <details open>
+      <summary>نشت داده (Data Leakage) چیست؟</summary>
+      <p>یعنی اطلاعاتی از بیرونِ مجموعه‌ی آموزش، ناخواسته وارد آموزش شود؛ نتیجه‌اش تخمینِ <b>خوش‌بینانه و دروغین</b> از کارایی مدل است. عوامل: پیش‌پردازش روی کلِ داده پیش از تقسیم، اسکیل با آمارِ کل داده، یا استفاده از ستون هدف در ساختِ ویژگی.</p>
+    </details>
+    <div class="think"><b>نکته‌ی صادقانه:</b> در این پروژه، حذفِ پرت و انتخاب ویژگی پیش از تقسیم انجام شد که خودش نوعی نشتِ خفیف است؛ این را در گزارش هم ذکر کردیم چون بخشی از تمرین بود.</div>
+  </section>
+
+  <!-- 8 -->
+  <section class="card" id="imbalance">
+    <h2>۸. متعادل‌سازی کلاس‌ها (Class Imbalance)</h2>
+    <p>اگر یک کلاس خیلی پرتعدادتر باشد، مدل به سمتِ آن سوگیری می‌کند. سه روش:</p>
+    <table>
+      <tr><th>روش</th><th>ایده</th><th>ریسک</th></tr>
+      <tr><td>Random Oversampling</td><td>تکرارِ نمونه‌های اقلیت</td><td>بیش‌برازش / تکرارِ نویز</td></tr>
+      <tr><td>Random Undersampling</td><td>حذفِ نمونه‌های اکثریت</td><td>از دست رفتنِ اطلاعات / کم‌برازش</td></tr>
+      <tr><td>SMOTE</td><td>ساختِ نمونه‌ی مصنوعیِ اقلیت</td><td>نامناسب برای ویژگیِ دسته‌ای</td></tr>
+    </table>
+    <div class="think"><b>انتخاب ما: Oversampling.</b> دیتاست بزرگ نبود (پس Undersampling خطرِ از دست دادنِ داده داشت) و بسیاری از ویژگی‌ها دسته‌ای بودند (پس SMOTE مناسب نبود). نکته: متعادل‌سازی <b>فقط روی داده‌ی آموزش</b> انجام شد تا نشت نداشته باشیم.</div>
+  </section>
+
+  <!-- 9 -->
+  <section class="card" id="scale">
+    <h2>۹. استانداردسازی و نرمال‌سازی</h2>
+    <div class="grid2">
+      <details open><summary>Min-Max (نرمال‌سازی)</summary>
+        <div class="formula">X' = (X − Xmin) / (Xmax − Xmin) → [0,1]</div>
+        <p>به داده‌ی پرت <b>حساس</b> است.</p>
+      </details>
+      <details open><summary>Z-Score (استانداردسازی)</summary>
+        <div class="formula">X' = (X − μ) / σ → میانگین ۰، انحراف ۱</div>
+        <p>به داده‌ی پرت <b>کم‌حساس</b> است.</p>
+      </details>
+    </div>
+    <div class="think"><b>انتخاب ما: StandardScaler.</b> چون مدل‌هایی مثل Logistic، KNN و SVM به اسکیل حساس‌اند و چون داده‌هایِ پرتِ ارزشمندی داریم که Min-Max به آن‌ها حساس است. مهم: <code>scaler</code> فقط روی <b>train</b> برازش (fit) می‌شود و همان روی test اعمال می‌گردد.</div>
+  </section>
+
+  <!-- 10 -->
+  <section class="card" id="cv">
+    <h2>۱۰. اعتبارسنجی متقابل و Grid Search</h2>
+    <p><b>K-Fold Cross-Validation:</b> داده‌ی آموزش به k تکه تقسیم می‌شود؛ هر بار یک تکه تست و بقیه آموزش‌اند تا همه نقشِ تست را بازی کنند. نتیجه پایدارتر و کم‌ریسک‌تر برای بیش‌برازش است.</p>
+    <ul>
+      <li><b>k کوچک:</b> سریع‌تر، اما واریانسِ تخمین بیشتر.</li>
+      <li><b>k بزرگ:</b> تخمینِ دقیق‌تر، اما هزینه‌ی محاسباتیِ بالا.</li>
+    </ul>
+    <p><b>Grid Search:</b> همه‌ی ترکیب‌های هایپرپارامتر را با CV امتحان می‌کند و بهترین را بر اساس معیار (اینجا <b>F1</b>) برمی‌گرداند. روش‌های جایگزین: Random Search (سریع‌تر، تصادفی) و Bayesian Optimization (هوشمندتر، با مدلِ جانشین).</p>
+    <div class="why"><b>چرا F1 به‌عنوان معیارِ Grid Search؟</b> چون داده کمی نامتوازن است و F1 تعادلِ Precision و Recall را می‌سنجد، نه صرفاً دقتِ کلی.</div>
+  </section>
+
+  <!-- 11 -->
+  <section class="card" id="metrics">
+    <h2>۱۱. معیارهای ارزیابی</h2>
+    <p>پایه‌ی همه‌ی معیارها <b>ماتریس درهم‌ریختگی</b> است: TP، FP، TN، FN.</p>
+    <table>
+      <tr><th>معیار</th><th>تعریف</th><th>کِی مهم است</th></tr>
+      <tr><td>Accuracy</td><td>(TP+TN)/کل</td><td>داده‌ی متوازن</td></tr>
+      <tr><td>Precision</td><td>TP/(TP+FP)</td><td>هزینه‌ی FP بالا</td></tr>
+      <tr><td>Recall</td><td>TP/(TP+FN)</td><td>هزینه‌ی FN بالا</td></tr>
+      <tr><td>F1</td><td>میانگین هارمونیک Precision و Recall</td><td>داده‌ی نامتوازن</td></tr>
+    </table>
+    <div class="why"><b>چرا F1 محورِ مقایسه شد؟</b> چون هم به دقتِ پیش‌بینیِ مثبت‌ها و هم به پوششِ آن‌ها اهمیت می‌دهد و در داده‌ی نامتوازن گمراه‌کننده نیست.</div>
+  </section>
+
+  <!-- 12 -->
+  <section class="card" id="models">
+    <h2>۱۲. شش مدل یادگیری ماشین</h2>
+    <details open><summary><span class="step-num">۱</span> Logistic Regression — رگرسیون لجستیک</summary>
+      <p>ترکیبِ خطیِ ویژگی‌ها را از تابعِ سیگموید عبور می‌دهد تا احتمالی بین ۰ و ۱ بسازد. <b>ساده، سریع، قابل‌تفسیر</b> ولی فقط مرزِ خطی. هایپرپارامترِ کلیدی: <code>C</code> (معکوسِ شدتِ Regularization).</p>
+    </details>
+    <details><summary><span class="step-num">۲</span> Decision Tree — درخت تصمیم</summary>
+      <p>با سؤال‌های پشت‌سرهم داده را تقسیم می‌کند. هر گره یک شرط، هر برگ یک پیش‌بینی. هایپرپارامترها: <code>max_depth</code>، <code>min_samples_split/leaf</code>، <code>criterion</code> (gini/entropy). <b>قابل‌تفسیر</b> ولی یک‌درختِ تنها مستعدِ بیش‌برازش.</p>
+    </details>
+    <details><summary><span class="step-num">۳</span> Random Forest — جنگل تصادفی</summary>
+      <p>ترکیبِ صدها درختِ تصادفی با رأی‌گیری (Bagging). مقاوم به بیش‌برازش و خوب در انتخابِ ویژگی. هایپرپارامترِ کلیدی: <code>n_estimators</code> (تعداد درخت‌ها).</p>
+    </details>
+    <details><summary><span class="step-num">۴</span> KNN — k نزدیک‌ترین همسایه</summary>
+      <p>برای هر نمونه، فاصله‌اش با همه را حساب و رأیِ k همسایه‌ی نزدیک را می‌گیرد. مدلِ «تنبل» (بدونِ آموزشِ واقعی). <b>حتماً به اسکیل نیاز دارد.</b> هایپرپارامتر: <code>n_neighbors</code>، <code>metric</code>.</p>
+    </details>
+    <details><summary><span class="step-num">۵</span> SVM — ماشین بردار پشتیبان</summary>
+      <p>دنبالِ ابرصفحه‌ای با بیشترین حاشیه است؛ با Kernel داده را به بُعدِ بالاتر می‌برد تا مرزِ غیرخطی بسازد. قدرتمند ولی روی داده‌ی بزرگ <b>کند</b> (پیچیدگیِ ~O(n²)–O(n³)). هایپرپارامترها: <code>C</code>، <code>gamma</code>، <code>kernel</code>.</p>
+    </details>
+    <details><summary><span class="step-num">۶</span> XGBoost — گرادیان بوستینگ</summary>
+      <p>درخت‌ها را <b>پشت‌سرهم</b> می‌سازد و هر درخت خطای قبلی را تصحیح می‌کند. با Regularization، ریسکِ بیش‌برازش پایین. هایپرپارامترها: <code>n_estimators</code>، <code>learning_rate</code>، <code>max_depth</code>، <code>subsample</code>. <span class="pill">بهترین مدلِ این پروژه</span></p>
+    </details>
+  </section>
+
+  <!-- 13 -->
+  <section class="card" id="viz">
+    <h2>۱۳. نمایش و مقایسه‌ی نتایج</h2>
+    <details open><summary>t-SNE</summary>
+      <p>روشِ کاهشِ ابعادِ غیرخطی که داده‌ی چندبُعدی را به ۲ بُعد می‌آورد تا ببینیم کلاس‌ها چقدر از هم جدا شده‌اند و مدل چطور آن‌ها را طبقه‌بندی کرده.</p>
+    </details>
+    <details><summary>منحنی ROC و AUC</summary>
+      <p>رابطه‌ی نرخِ مثبتِ واقعی (TPR) و نرخِ مثبتِ کاذب (FPR) را در آستانه‌های مختلف نشان می‌دهد. AUC (مساحتِ زیرِ منحنی) بین ۰٫۵ و ۱ است؛ هرچه به ۱ نزدیک‌تر، بهتر. AUC مستقل از آستانه است و در داده‌ی نامتوازن بهتر از Accuracy عمل می‌کند. (برای SVM باید <code>probability=True</code> باشد.)</p>
+    </details>
+    <details><summary>ماتریس درهم‌ریختگی</summary>
+      <p>برخلافِ Accuracy، <b>نوعِ خطا</b> (FP یا FN) را نشان می‌دهد؛ در حوزه‌های حساس مثل ریسکِ اعتباری بسیار مهم است. مدل‌های درختی معمولاً FN کمتری دارند و Logistic بیشترین FN را.</p>
+    </details>
+  </section>
+
+  <!-- 14 -->
+  <section class="card" id="fi">
+    <h2>۱۴. اهمیت ویژگی‌ها (Feature Importance)</h2>
+    <p>مدل‌های درختی (Decision Tree، Random Forest، XGBoost) می‌توانند بگویند هر ویژگی چقدر در تصمیم نقش داشته (بر اساسِ کاهشِ ناخالصی).</p>
+    <ul>
+      <li>هر سه مدل، <code>cibil_score</code> را مهم‌ترین می‌دانند چون قوی‌ترین رابطه را با هدف دارد.</li>
+      <li>اهمیت در Random Forest «صاف‌تر» است چون میانگینِ صدها درخت گرفته می‌شود.</li>
+      <li><b>خطر:</b> وابستگیِ زیاد به یک ویژگی، مدل را شکننده می‌کند. برای بررسیِ بقیه می‌توان از <b>Permutation Importance</b> یا حذفِ ستونِ غالب استفاده کرد.</li>
+    </ul>
+  </section>
+
+  <!-- 15 -->
+  <section class="card" id="summary">
+    <h2>۱۵. جمع‌بندی و طرز فکر ما</h2>
+    <p>کلِ مسیر را با یک منطقِ روشن طی کردیم:</p>
+    <ol>
+      <li>داده را شناختیم (EDA) و مشکلاتش را پیدا کردیم.</li>
+      <li>گم‌شده‌ها را با روشِ متناسب با هر ستون پر کردیم (میانه برای چوله، نسبت برای دسته‌ای).</li>
+      <li>دسته‌ای‌ها را One-Hot کردیم و پرتِ واقعی را با IQRِ تکرارشونده حذف کردیم.</li>
+      <li>ویژگی‌ها را با پیرسون + MI انتخاب کردیم تا هم خطی و هم غیرخطی پوشش داده شود.</li>
+      <li>داده را تقسیم، کلاس‌ها را Oversample و ویژگی‌ها را استاندارد کردیم (همه با مراقبت از نشتِ داده).</li>
+      <li>۶ مدل را با Grid Search + K-Fold و معیارِ F1 تنظیم و ارزیابی کردیم.</li>
+      <li>با Bar Chart، ROC/AUC، ماتریس درهم‌ریختگی و Feature Importance مقایسه کردیم.</li>
+    </ol>
+    <div class="why"><b>نتیجه:</b> <b>XGBoost</b> بهترین عملکردِ کلی (Test F1) را داشت، بدونِ نشانه‌ی بیش‌برازشِ جدی؛ چون روابطِ غیرخطی و تعاملِ ویژگی‌ها را خوب یاد می‌گیرد و با داده‌ی دسته‌ایِ این اندازه سازگار است.</div>
+    <div class="think"><b>تأمل نهایی:</b> این مدل به‌عنوان <b>ابزارِ کمکیِ کنارِ کارشناسِ انسانی</b> ارزشمند است، اما برای استقرارِ واقعی باید سوگیری، تفسیرپذیری، الزاماتِ قانونی و تغییرِ توزیعِ داده (Data Drift) جدی‌تر بررسی شوند.</div>
+  </section>
+
+  <footer>
+    تهیه‌شده به‌عنوان راهنمای ارائه‌ی پروژه‌ی دوم داده‌کاوی — بهار ۱۴۰۵ · همه‌ی محتوا تعاملی است؛ روی هر بخش کلیک کنید تا باز/بسته شود.
+  </footer>
+  </main>
+</div>
+
+<script>
+  // progress bar
+  const bar=document.getElementById('bar');
+  addEventListener('scroll',()=>{
+    const h=document.documentElement;
+    const p=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+    bar.style.width=p+'%';
+  });
+  // smooth scroll for TOC
+  document.querySelectorAll('nav.toc a').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const t=document.querySelector(a.getAttribute('href'));
+      if(t){e.preventDefault(); t.scrollIntoView({behavior:'smooth'});
+        t.querySelectorAll('details').forEach(d=>d.open=true);}
+    });
+  });
+</script>
+</body>
+</html>
